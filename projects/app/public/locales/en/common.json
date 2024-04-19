@@ -819,6 +819,9 @@
         "UnValid Website Tip": "Your site may not be static and cannot be synchronized"
       }
     },
+    "abstract":{
+       "My Abstract": "My Abstract"
+    },
     "module": {
       "Add question type": "Add type",
       "Can not connect self": "Cannot connect itself",
@@ -1213,6 +1216,7 @@
     "Apps Share": "",
     "Chat": "Chat",
     "Datasets": "DataSet",
+    "Abstract": "Abstract",
     "Module": "Module",
     "Plugin": "Plugin",
     "Store": "Store",

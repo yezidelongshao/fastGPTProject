@@ -820,6 +820,9 @@
         "UnValid Website Tip": "您的站点可能非静态站点，无法同步"
       }
     },
+    "abstract":{
+       "My Abstract": "我的摘要"
+    },
     "module": {
       "Add question type": "添加问题类型",
       "Can not connect self": "不能连接自身",
@@ -1215,6 +1218,7 @@
     "Apps Share": "应用分享",
     "Chat": "聊天",
     "Datasets": "知识库",
+    "Abstract": "摘要生成",
     "Module": "模块",
     "Plugin": "插件",
     "Store": "应用市场",

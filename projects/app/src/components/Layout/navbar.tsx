@@ -48,6 +48,13 @@ const Navbar = ({ unread }: { unread: number }) => {
         activeLink: ['/plugin/list', '/plugin/edit']
       },
       {
+        label: t('navbar.Abstract'),
+        icon: 'core/abstract/abstractLight',
+        activeIcon: 'core/abstract/abstractFill',
+        link: `/abstract/list`,
+        activeLink: ['/abstract/list', '/abstract/detail']
+      },
+      {
         label: t('navbar.Datasets'),
         icon: 'core/dataset/datasetLight',
         activeIcon: 'core/dataset/datasetFill',
