@@ -51,8 +51,8 @@ const Navbar = ({ unread }: { unread: number }) => {
         label: t('navbar.Abstract'),
         icon: 'core/abstract/abstractLight',
         activeIcon: 'core/abstract/abstractFill',
-        link: `/abstract/list`,
-        activeLink: ['/abstract/list', '/abstract/detail']
+        link: `/abstract`,
+        activeLink: ['/abstract']
       },
       {
         label: t('navbar.Datasets'),
