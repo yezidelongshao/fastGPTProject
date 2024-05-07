@@ -37,6 +37,14 @@ import { checkChatSupportSelectFileByChatModels } from '@/web/core/chat/utils';
 import { getChatTitleFromChatMessage } from '@fastgpt/global/core/chat/utils';
 import { ChatStatusEnum } from '@fastgpt/global/core/chat/constants';
 import { GPTMessages2Chats } from '@fastgpt/global/core/chat/adapt';
+import { ImportSourceItemType } from '@/web/core/dataset/type.d';
+
+import FileSelector, { type SelectFileItemType } from '@/web/core/abstract/components/FileSelector';
+
+
+type FileItemType = ImportSourceItemType & { file: File };
+const fileType = '.txt, .doc, .docx, .csv, .pdf, .md, .html, .ofd, .wps';
+const maxSelectFileCount = 1000;
 
 const Chat = ({ appId, chatId }: { appId: string; chatId: string }) => {
   const router = useRouter();
@@ -245,6 +253,12 @@ const Chat = ({ appId, chatId }: { appId: string; chatId: string }) => {
 
   useQuery(['loadHistories', appId], () => (appId ? loadHistories({ appId }) : null));
 
+  const onSelectFile = async (e: SelectFileItemType[]) => {
+    const file = e[0].file;
+    if (!file) return;
+    console.log(file);
+  };
+
   return (
     <Flex h={'100%'}>
       <Head>
@@ -342,12 +356,21 @@ const Chat = ({ appId, chatId }: { appId: string; chatId: string }) => {
               showHistory
             />
 
+
             {/* chat box */}
             <Box flex={1}>
+              <FileSelector
+                  isLoading={true}
+                  fileType={fileType}
+                  multiple
+                  maxCount={maxSelectFileCount}
+                  maxSize={(500) * 1024 * 1024}
+                  onSelectFile={onSelectFile}
+              />
               <ChatBox
-                ref={ChatBoxRef}
-                showEmptyIntro
-                appAvatar={chatData.app.avatar}
+                  ref={ChatBoxRef}
+                  showEmptyIntro
+                  appAvatar={chatData.app.avatar}
                 userAvatar={userInfo?.avatar}
                 userGuideModule={chatData.app?.userGuideModule}
                 showFileSelector={checkChatSupportSelectFileByChatModels(chatData.app.chatModels)}
