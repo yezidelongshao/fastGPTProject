@@ -150,6 +150,7 @@ const Detail = ({ datasetId, currentTab }: { datasetId: string; currentTab: `${T
         <title>{datasetDetail?.name}</title>
       </Head>
       <PageContainer>
+        {/* 自定义两栏布局 */}
         <MyBox
           isLoading={isUpdating}
           display={'flex'}
@@ -273,7 +274,7 @@ const Detail = ({ datasetId, currentTab }: { datasetId: string; currentTab: `${T
               />
             </Box>
           )}
-
+          {/* 右侧栏的渲染 */}
           {!!datasetDetail._id && (
             <Box flex={'1 0 0'} pb={0}>
               {currentTab === TabEnum.collectionCard && <CollectionCard />}

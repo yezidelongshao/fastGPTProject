@@ -108,6 +108,7 @@ export type ChatItemType = (UserChatItemType | SystemChatItemType | AIChatItemTy
   dataId?: string;
 };
 
+// 交叉类型允许我们将多个类型合并成一个类型，新的类型将具有所有组成类型的所有属性
 export type ChatSiteItemType = (UserChatItemType | SystemChatItemType | AIChatItemType) & {
   dataId: string;
   status: `${ChatStatusEnum}`;

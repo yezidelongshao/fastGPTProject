@@ -41,7 +41,7 @@ const colorMap = {
     color: 'green.700'
   }
 };
-
+// 本组件用于展示聊天界面中的单个消息项，并根据消息的类型（人类或AI）和状态来定制样式和布局。
 const ChatItem = ({
   type,
   avatar,

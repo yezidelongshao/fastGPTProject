@@ -87,7 +87,7 @@ const CollectionCard = () => {
   const { openConfirm: openSyncConfirm, ConfirmModal: ConfirmSyncModal } = useConfirm({
     content: t('core.dataset.collection.Start Sync Tip')
   });
-
+  
   const {
     isOpen: isOpenFileSourceSelector,
     onOpen: onOpenFileSourceSelector,
@@ -437,6 +437,7 @@ const CollectionCard = () => {
                           {t('core.dataset.Text collection')}
                         </Flex>
                       ),
+                      // 文本数据集导入入口
                       onClick: onOpenFileSourceSelector
                     },
                     {

@@ -7,6 +7,7 @@ import { useRouter } from 'next/router';
 import { TabEnum } from '../../..';
 import { ImportDataSourceEnum } from '@fastgpt/global/core/dataset/constants';
 
+//文件源选择器
 const FileModeSelector = ({ onClose }: { onClose: () => void }) => {
   const { t } = useTranslation();
   const router = useRouter();

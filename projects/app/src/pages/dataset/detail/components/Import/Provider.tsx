@@ -9,7 +9,10 @@ import { ImportProcessWayEnum } from '@/web/core/dataset/constants';
 import { ImportSourceItemType } from '@/web/core/dataset/type';
 import { ImportDataSourceEnum } from '@fastgpt/global/core/dataset/constants';
 
+
+//类型定义 ChunkSizeFieldType、FormType 和 useImportStoreType
 type ChunkSizeFieldType = 'embeddingChunkSize';
+
 export type FormType = {
   mode: `${TrainingModeEnum}`;
   way: `${ImportProcessWayEnum}`;
@@ -35,6 +38,8 @@ type useImportStoreType = {
   uploadRate: number;
   importSource: `${ImportDataSourceEnum}`;
 };
+
+//创建了一个名为StateContext的context对象，并导出了useImportStore函数，用于获取该context对象的内容。
 const StateContext = createContext<useImportStoreType>({
   processParamsForm: {} as any,
   sources: [],
@@ -55,6 +60,7 @@ const StateContext = createContext<useImportStoreType>({
 
 export const useImportStore = () => useContext(StateContext);
 
+//provider组件，接受importSource、dataset和parentId，children作为props,将这些context的值提供给其子组件
 const Provider = ({
   importSource,
   dataset,
@@ -83,13 +89,15 @@ const Provider = ({
   const { t } = useTranslation();
   const [sources, setSources] = useState<ImportSourceItemType[]>([]);
 
-  // watch form
+  // 监听表单的变化
   const mode = processParamsForm.watch('mode');
   const way = processParamsForm.watch('way');
   const embeddingChunkSize = processParamsForm.watch('embeddingChunkSize');
   const customSplitChar = processParamsForm.watch('customSplitChar');
 
+  // 定义训练模式的静态参数
   const modeStaticParams = {
+    //auto模式
     [TrainingModeEnum.auto]: {
       chunkOverlapRatio: 0.2,
       maxChunkSize: 2048,
@@ -104,6 +112,7 @@ const Provider = ({
       }),
       uploadRate: 100
     },
+    //chunk模式
     [TrainingModeEnum.chunk]: {
       chunkSizeField: 'embeddingChunkSize' as ChunkSizeFieldType,
       chunkOverlapRatio: 0.2,
@@ -119,6 +128,7 @@ const Provider = ({
       }),
       uploadRate: 150
     },
+    //qa模式
     [TrainingModeEnum.qa]: {
       chunkOverlapRatio: 0,
       maxChunkSize: 8000,
@@ -134,21 +144,26 @@ const Provider = ({
       uploadRate: 30
     }
   };
+  
   const selectModelStaticParam = useMemo(() => modeStaticParams[mode], [mode]);
-
+  
+  //定义处理方式的静态参数
   const wayStaticPrams = {
+    //自动处理
     [ImportProcessWayEnum.auto]: {
       chunkSize: selectModelStaticParam.autoChunkSize,
       customSplitChar: ''
     },
+    //自定义处理
     [ImportProcessWayEnum.custom]: {
       chunkSize: modeStaticParams[mode].chunkSize,
       customSplitChar
     }
   };
-
+  //获取当前处理方式下chunkSize的值
   const chunkSize = wayStaticPrams[way].chunkSize;
 
+  //创建value对象，包含所有共享的数据
   const value: useImportStoreType = {
     parentId,
     processParamsForm,
@@ -159,6 +174,7 @@ const Provider = ({
 
     importSource
   };
+  //在子组件中通过useContext获取共享的数据
   return <StateContext.Provider value={value}>{children}</StateContext.Provider>;
 };
 

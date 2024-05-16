@@ -88,6 +88,10 @@ type Props = OutLinkChatAuthProps & {
   chatId?: string;
 
   onUpdateVariable?: (e: Record<string, any>) => void;
+
+  //这段代码声明了一个可选的 onStartChat 函数，用于开始聊天操作。该函数接受一个 StartChatFnProps 类型的参数，
+  //并返回一个包含聊天响应的 Promise 对象。返回的对象包含聊天响应文本、聊天历史记录数组以及一个可选的布尔值，
+  //指示是否是一个新的聊天会话
   onStartChat?: (e: StartChatFnProps) => Promise<{
     responseText: string;
     [DispatchNodeResponseKeyEnum.nodeResponse]: ChatHistoryItemResType[];
@@ -112,7 +116,7 @@ const ChatBox = (
     showEmptyIntro = false,
     appAvatar,
     userAvatar,
-    showFileSelector,
+    showFileSelector =true,
     active = true,
     appId,
     chatId,
@@ -879,9 +883,11 @@ const ChatBox = (
     <Flex flexDirection={'column'} h={'100%'}>
       <Script src="/js/html2pdf.bundle.min.js" strategy="lazyOnload"></Script>
       {/* chat box container */}
+      {/* 包含聊天记录和输入框的容器 */}
       <Box ref={ChatBoxRef} flex={'1 0 0'} h={0} w={'100%'} overflow={'overlay'} px={[4, 0]} pb={3}>
         <Box id="chat-container" maxW={['100%', '92%']} h={'100%'} mx={'auto'}>
-          {showEmpty && <Empty />}
+          {/* {showEmpty && <Empty />} */}
+          {/* 显示welcomBox组件 */}
           {!!welcomeText && <WelcomeBox appAvatar={appAvatar} welcomeText={welcomeText} />}
           {/* variable input */}
           {!!filterVariableModules?.length && (
@@ -890,6 +896,7 @@ const ChatBox = (
               variableModules={filterVariableModules}
               variableIsFinish={variableIsFinish}
               chatForm={chatForm}
+              // 回调函数，提交变量时触发
               onSubmitVariables={(data) => {
                 setValue('chatStarted', true);
                 onUpdateVariable?.(data);
@@ -897,6 +904,7 @@ const ChatBox = (
             />
           )}
           {/* chat history */}
+          {/* 遍历chatHistories数组，显示聊天历史内容 */}
           <Box id={'history'}>
             {chatHistories.map((item, index) => (
               <Box key={item.dataId} py={5}>
@@ -935,8 +943,10 @@ const ChatBox = (
                         onReadUserDislike: onReadUserDislike(item)
                       })}
                     >
+                      {/* 引用、显示详情 子组件 */}
                       <ResponseTags
                         flowResponses={item.responseData}
+                        // showDetail显示详情开关
                         showDetail={!shareId && !teamId}
                       />
 
@@ -980,6 +990,7 @@ const ChatBox = (
         </Box>
       </Box>
       {/* message input */}
+      {/* 信息输入框 */}
       {onStartChat && variableIsFinish && active && (
         <MessageInput
           onSendMessage={sendPrompt}

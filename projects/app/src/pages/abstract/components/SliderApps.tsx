@@ -20,6 +20,10 @@ const SliderApps = ({
 
   return (
     <Flex flexDirection={'column'} h={'100%'}>
+              {/* <Image src={'/imgs/module/db.png'} alt={''} mr={2} h={'24px'} /> */}
+      {/* <Box className="textlg" letterSpacing={1} fontSize={'24px'} fontWeight={'bold'}>
+                {t('core.dataset.My Dataset')}
+      </Box> */}
       <Box px={5} py={4}>
         {showExist && (
           <Flex
@@ -40,12 +44,12 @@ const SliderApps = ({
               borderRadius={'50%'}
               aria-label={''}
             />
-            {t('core.chat.Exit Chat')}
+            {t('common.Exit')}
           </Flex>
         )}
       </Box>
 
-      <Box flex={'1 0 0'} h={0} px={5} overflow={'overlay'}>
+      {/* <Box flex={'1 0 0'} h={0} px={5} overflow={'overlay'}>
         {apps.map((item) => (
           <Flex
             key={item._id}
@@ -81,7 +85,7 @@ const SliderApps = ({
             </Box>
           </Flex>
         ))}
-      </Box>
+      </Box> */}
     </Flex>
   );
 };

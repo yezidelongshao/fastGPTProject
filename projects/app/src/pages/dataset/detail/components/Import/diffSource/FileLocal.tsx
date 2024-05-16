@@ -13,9 +13,9 @@ const DataProcess = dynamic(() => import('../commonProgress/DataProcess'), {
   loading: () => <Loading fixed={false} />
 });
 const Upload = dynamic(() => import('../commonProgress/Upload'));
-
 const fileType = '.txt, .docx, .csv, .xlsx, .pdf, .md, .html, .pptx';
 
+//根据activeStep渲染不同的组件
 const FileLocal = ({ activeStep, goToNext }: ImportDataComponentProps) => {
   return (
     <>
@@ -30,7 +30,9 @@ export default React.memo(FileLocal);
 
 const SelectFile = React.memo(function SelectFile({ goToNext }: { goToNext: () => void }) {
   const { t } = useTranslation();
+  //获取sources数组和setSources方法
   const { sources, setSources } = useImportStore();
+  //功能：用户选择上传文件后，初始化文件列表时，将文件状态设置为未上传
   const [selectFiles, setSelectFiles] = useState<ImportSourceItemType[]>(
     sources.map((source) => ({
       isUploading: false,
@@ -59,7 +61,6 @@ const SelectFile = React.memo(function SelectFile({ goToNext }: { goToNext: () =
         onStartSelect={() => setUploading(true)}
         onFinishSelect={() => setUploading(false)}
       />
-
       {/* render files */}
       <RenderUploadFiles files={selectFiles} setFiles={setSelectFiles} showPreviewContent />
 

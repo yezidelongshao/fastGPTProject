@@ -1,4 +1,4 @@
-import React, { useCallback, useRef } from 'react';
+import React, { useCallback, useRef} from 'react';
 import Head from 'next/head';
 import { useRouter } from 'next/router';
 import { getInitChatInfo } from '@/web/core/chat/api';
@@ -26,8 +26,8 @@ import ChatBox from '@/components/ChatBox';
 import type { ComponentRef, StartChatFnProps } from '@/components/ChatBox/type.d';
 import PageContainer from '@/components/PageContainer';
 import SideBar from '@/components/SideBar';
-import ChatHistorySlider from './components/ChatHistorySlider';
-import SliderApps from './components/SliderApps';
+// import ChatHistorySlider from './components/ChatHistorySlider';
+// import SliderApps from './components/SliderApps';
 import ChatHeader from './components/ChatHeader';
 import { getErrText } from '@fastgpt/global/common/error/utils';
 import { useUserStore } from '@/web/support/user/useUserStore';
@@ -40,9 +40,18 @@ import { GPTMessages2Chats } from '@fastgpt/global/core/chat/adapt';
 import { ImportSourceItemType } from '@/web/core/dataset/type.d';
 
 import FileSelector, { type SelectFileItemType } from '@/web/core/abstract/components/FileSelector';
+import { readFileRawContent } from '@fastgpt/service/common/file/read/utils';
+import { getUploadBase64ImgController} from '@/web/common/file/controller'
+import { getNanoid } from '@fastgpt/global/common/string/tools';
+import { splitText2Chunks } from '@fastgpt/global/common/string/textSplitter';
+// import { useImportStore } from '@/pages/dataset/detail/components/Import/Provider'
+// import FileSelector,{ type SelectFileItemType }from '@/pages/dataset/detail/components/Import/components/FileSelector';
 
-
+let fileContent: string ;
+let chunks:string[] = [];
+const relatedId = getNanoid(32);
 type FileItemType = ImportSourceItemType & { file: File };
+
 const fileType = '.txt, .doc, .docx, .csv, .pdf, .md, .html, .ofd, .wps';
 const maxSelectFileCount = 1000;
 
@@ -77,11 +86,14 @@ const Chat = ({ appId, chatId }: { appId: string; chatId: string }) => {
   const { Loading, setIsLoading } = useLoading();
   const { isOpen: isOpenSlider, onClose: onCloseSlider, onOpen: onOpenSlider } = useDisclosure();
 
+  // 这段代码定义了一个名为 startChat 的异步函数，
+  // 该函数处理开始聊天的操作，包括发送消息、处理响应、更新聊天历史记录和界面。
   const startChat = useCallback(
     async ({ messages, controller, generatingMessage, variables }: StartChatFnProps) => {
       const prompts = messages.slice(-2);
       const completionChatId = chatId ? chatId : nanoid();
 
+      // 调用 streamFetch 函数发送请求并获取响应
       const { responseText, responseData } = await streamFetch({
         data: {
           messages: prompts,
@@ -92,10 +104,11 @@ const Chat = ({ appId, chatId }: { appId: string; chatId: string }) => {
         onMessage: generatingMessage,
         abortCtrl: controller
       });
-
+      //定义新对话的标题
       const newTitle = getChatTitleFromChatMessage(GPTMessages2Chats(prompts)[0]);
 
-      // new chat
+      // 如果当前对话的 ID 不等于新对话的 ID，则说明是新对话，需要将新对话添加到历史记录中
+      // 否则，说明是同一个对话，只需要更新对话历史记录即可
       if (completionChatId !== chatId) {
         const newHistory: ChatHistoryItemType = {
           chatId: completionChatId,
@@ -105,6 +118,7 @@ const Chat = ({ appId, chatId }: { appId: string; chatId: string }) => {
           top: false
         };
         pushHistory(newHistory);
+        // 如果中止信号的原因不是“离开”，则禁止刷新并使用 router.replace 更新路由
         if (controller.signal.reason !== 'leave') {
           forbidRefresh.current = true;
           router.replace({
@@ -115,8 +129,9 @@ const Chat = ({ appId, chatId }: { appId: string; chatId: string }) => {
           });
         }
       } else {
-        // update chat
+        // 查找当前对话的历史记录
         const currentChat = histories.find((item) => item.chatId === chatId);
+        // 更新当前对话的历史记录
         currentChat &&
           updateHistory({
             ...currentChat,
@@ -124,21 +139,21 @@ const Chat = ({ appId, chatId }: { appId: string; chatId: string }) => {
             title: newTitle
           });
       }
-      // update chat window
+      // 更新ChatData  state是现有的状态值
       setChatData((state) => ({
         ...state,
         title: newTitle,
         history: ChatBoxRef.current?.getChatHistories() || state.history
       }));
-
+      // 返回响应文本和响应数据
       return { responseText, responseData, isNewChat: forbidRefresh.current };
     },
     [appId, chatId, histories, pushHistory, router, setChatData, updateHistory]
   );
-
+ 
   useQuery(['loadModels'], () => loadMyApps(false));
 
-  // get chat app info
+  // 加载聊天信息
   const loadChatInfo = useCallback(
     async ({
       appId,
@@ -151,6 +166,7 @@ const Chat = ({ appId, chatId }: { appId: string; chatId: string }) => {
     }) => {
       try {
         loading && setIsLoading(true);
+        //调用getInitChatInfo()方法获取聊天信息
         const res = await getInitChatInfo({ appId, chatId });
         const history = res.history.map((item) => ({
           ...item,
@@ -253,10 +269,42 @@ const Chat = ({ appId, chatId }: { appId: string; chatId: string }) => {
 
   useQuery(['loadHistories', appId], () => (appId ? loadHistories({ appId }) : null));
 
-  const onSelectFile = async (e: SelectFileItemType[]) => {
-    const file = e[0].file;
+
+
+  const onSelectFile = (e: SelectFileItemType[]) => {
+    const file = e[0].file
+    // const extension = e[0].file.name.split('.')[1];
     if (!file) return;
-    console.log(file);
+    const file_size = e[0].file.size;
+    let chunksize:number;
+    if(file_size<8000){
+      chunksize = 8000;
+    }
+    else{
+      chunksize =5000;
+    }
+    const reader = new FileReader();
+    reader.readAsText(file);
+    reader.onload = function(event) {
+      if (event.target?.result && typeof event.target.result === 'string') {
+        
+          fileContent = event.target.result; 
+          //文本分块
+          const overlapRatio = 0.2;
+          chunks = splitText2Chunks({
+          text: fileContent,
+          chunkLen: chunksize,
+          overlapRatio,
+        }).chunks;
+        for(let i=0;i<chunks.length;i++){
+          console.log("文本分块：总"+ (chunks.length)+"块")
+          console.log("文本分块：第"+(i+1)+"块：");
+          console.log(chunks[i]);
+        }
+      }
+    };
+    //处理逻辑
+
   };
 
   return (
@@ -265,16 +313,16 @@ const Chat = ({ appId, chatId }: { appId: string; chatId: string }) => {
         <title>{chatData.app.name}</title>
       </Head>
       {/* pc show myself apps */}
-      {isPc && (
+      {/* {isPc && (
         <Box borderRight={theme.borders.base} w={'220px'} flexShrink={0}>
           <SliderApps apps={myApps} activeAppId={appId} />
         </Box>
-      )}
+      )} */}
 
       <PageContainer flex={'1 0 0'} w={0} p={[0, '16px']} position={'relative'}>
         <Flex h={'100%'} flexDirection={['column', 'row']} bg={'white'}>
           {/* pc always show history. */}
-          {((children: React.ReactNode) => {
+          {/* {((children: React.ReactNode) => {
             return isPc || !appId ? (
               <SideBar>{children}</SideBar>
             ) : (
@@ -336,7 +384,7 @@ const Chat = ({ appId, chatId }: { appId: string; chatId: string }) => {
                 });
               }}
             />
-          )}
+          )} */}
           {/* chat container */}
           <Flex
             position={'relative'}
@@ -358,19 +406,21 @@ const Chat = ({ appId, chatId }: { appId: string; chatId: string }) => {
 
 
             {/* chat box */}
-            <Box flex={1}>
+            <Box flex={0.8}>
+              <Box flex={0.2} w='60%' margin={'auto'} p={4}>
               <FileSelector
-                  isLoading={true}
+                  isLoading={false}
                   fileType={fileType}
-                  multiple
+                  multiple={false}
                   maxCount={maxSelectFileCount}
-                  maxSize={(500) * 1024 * 1024}
+                  maxSize={(300) * 1024 * 1024}
                   onSelectFile={onSelectFile}
               />
+              </Box>
               <ChatBox
-                  ref={ChatBoxRef}
-                  showEmptyIntro
-                  appAvatar={chatData.app.avatar}
+                ref={ChatBoxRef}
+                showEmptyIntro
+                appAvatar={chatData.app.avatar}
                 userAvatar={userInfo?.avatar}
                 userGuideModule={chatData.app?.userGuideModule}
                 showFileSelector={checkChatSupportSelectFileByChatModels(chatData.app.chatModels)}

@@ -1,5 +1,5 @@
 import React, { useMemo } from 'react';
-import { Flex, useTheme, Box } from '@chakra-ui/react';
+import { Flex, useTheme, Box ,IconButton} from '@chakra-ui/react';
 import { useSystemStore } from '@/web/common/system/useSystemStore';
 import MyIcon from '@fastgpt/web/components/common/Icon';
 import Avatar from '@/components/Avatar';
@@ -45,7 +45,29 @@ const ChatHeader = ({
       borderBottom={theme.borders.sm}
       color={'myGray.900'}
     >
-      {isPc ? (
+       <Box px={5} py={4}>
+          <Flex
+            alignItems={'center'}
+            cursor={'pointer'}
+            py={2}
+            px={3}
+            borderRadius={'md'}
+            _hover={{ bg: 'myGray.200' }}
+            onClick={() => router.push('/app/list')}
+          >
+            <IconButton
+              mr={3}
+              icon={<MyIcon name={'common/backFill'} w={'18px'} color={'primary.500'} />}
+              bg={'white'}
+              boxShadow={'1px 1px 9px rgba(0,0,0,0.15)'}
+              size={'smSquare'}
+              borderRadius={'50%'}
+              aria-label={''}
+            />
+            {t('common.Exit')}
+          </Flex>
+      </Box>
+      {/* {isPc ? (
         <>
           <Box mr={3} color={'myGray.1000'}>
             {title}
@@ -91,9 +113,9 @@ const ChatHeader = ({
             </Box>
           </Flex>
         </>
-      )}
+      )} */}
       {/* control */}
-      <ToolMenu history={history} />
+      {/* <ToolMenu history={history} /> */}
     </Flex>
   );
 };

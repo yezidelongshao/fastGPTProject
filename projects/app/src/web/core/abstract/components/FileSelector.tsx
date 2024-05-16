@@ -12,6 +12,8 @@ export type SelectFileItemType = {
   file: File;
 };
 
+//fileSelector组件接受多个props，fileType:文件类型，multiple：是否多选，maxCount：最大选择数量，maxSize：最大大小，isLoading：是否加载中，
+//onSelectFile：选择文件后的回调函数,此外，组件还接受其他FlexProps类型的参数
 const FileSelector = ({
   fileType,
   multiple,
@@ -28,6 +30,7 @@ const FileSelector = ({
   isLoading?: boolean;
   onSelectFile: (e: SelectFileItemType[]) => any;
 } & FlexProps) => {
+  //组件内部逻辑
   const { t } = useTranslation();
   const { toast } = useToast();
   const { File, onOpen } = useSelectFile({
@@ -44,13 +47,14 @@ const FileSelector = ({
       .join('|')})$`,
     'i'
   );
-
+  // 定义一个回调函数，用于处理选择文件后的逻辑
   const selectFileCallback = useCallback(
     (files: SelectFileItemType[]) => {
       // size check
       if (!maxSize) {
         return onSelectFile(files);
       }
+      //过滤掉超出大小限制的文件
       const filterFiles = files.filter((item) => item.file.size <= maxSize);
 
       if (filterFiles.length < files.length) {
@@ -59,9 +63,10 @@ const FileSelector = ({
           title: t('common.file.Some file size exceeds limit', { maxSize: formatFileSize(maxSize) })
         });
       }
-
+      //无论文件是否都被接受，都调用onSelectFile，将过滤后的文件数组传递给它
       return onSelectFile(filterFiles);
     },
+    //依赖项数组，当依赖项发生变化时，回调函数才会重新执行
     [maxSize, onSelectFile, t, toast]
   );
 
@@ -164,6 +169,7 @@ const FileSelector = ({
       onDragOver={(e) => e.preventDefault()}
       onDragLeave={handleDragLeave}
       onDrop={handleDrop}
+      //点击触发选择文件
       onClick={onOpen}
     >
       <MyIcon name={'common/uploadFileFill'} w={'32px'} />
@@ -178,11 +184,12 @@ const FileSelector = ({
       </Box>
       <Box color={'myGray.500'} fontSize={'xs'}>
         {/* max count */}
-        {maxCount && t('common.file.Support max count', { maxCount })}
+        {/* {maxCount && t('common.file.Support max count', { maxCount })} */}
         {/* max size */}
         {maxSize && t('common.file.Support max size', { maxSize: formatFileSize(maxSize) })}
       </Box>
 
+      {/* File组件来显示已选择的文件列表，并监听文件选择事件，当文件被选择时，回调函数处理文件*/}
       <File
         onSelect={(files) =>
           selectFileCallback(
